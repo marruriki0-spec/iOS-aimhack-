@@ -1,1474 +1,791 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>RIKI Key Manager</title>
+  <title>RIKI x Proxy</title>
+  <meta name="theme-color" content="#070707">
 
-<meta name="theme-color" content="#060606">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-<style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
-}
-
-:root{
-    --bg:#050505;
-    --card:rgba(18,18,18,.88);
-    --card2:#0c0c0c;
-    --border:rgba(255,255,255,.075);
-    --text:#f5f5f5;
-    --muted:#707070;
-}
-
-html{
-    scroll-behavior:smooth;
-}
-
-body{
-    min-height:100vh;
-    background:
-        radial-gradient(
-            circle at 50% -15%,
-            rgba(255,255,255,.12),
-            transparent 38%
-        ),
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(255,255,255,.09), transparent 36%),
         #050505;
-    color:var(--text);
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Arial,
-        sans-serif;
-    overflow-x:hidden;
-}
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-/* background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+      background-size: 35px 35px;
+      mask-image: linear-gradient(to bottom, black, transparent);
+    }
 
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
+    .page {
+      width: 100%;
+      max-width: 520px;
+      margin: auto;
+      padding: 20px 16px 35px;
+      position: relative;
+      z-index: 1;
+    }
 
-    background:
-        linear-gradient(
-            rgba(255,255,255,.012) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,.012) 1px,
-            transparent 1px
-        );
+    /* =========================
+       HEADER
+    ========================= */
 
-    background-size:36px 36px;
+    .header {
+      text-align: center;
+      padding: 18px 0 25px;
+      animation: fadeDown .7s ease;
+    }
 
-    mask-image:
-        linear-gradient(
-            to bottom,
-            black,
-            transparent 80%
-        );
-}
+    .logo {
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
 
-/* =========================
-   APP
-========================= */
+    .logo span {
+      color: #999;
+      font-weight: 500;
+    }
 
-.app{
-    width:100%;
-    max-width:520px;
-    margin:auto;
-    padding:20px 15px 40px;
-    position:relative;
-    z-index:1;
-}
+    .subtitle {
+      color: #666;
+      font-size: 11px;
+      margin-top: 7px;
+      letter-spacing: 1.2px;
+    }
 
-/* =========================
-   HEADER
-========================= */
+    /* =========================
+       MAIN CARD
+    ========================= */
 
-.header{
-    text-align:center;
-    padding:18px 0 24px;
-    animation:headerIn .7s ease both;
-}
+    .card {
+      background: rgba(17,17,17,.88);
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 22px;
+      padding: 15px;
 
-.logo{
-    font-size:28px;
-    font-weight:850;
-    letter-spacing:1.4px;
-}
-
-.logo span{
-    color:#858585;
-    font-weight:500;
-}
-
-.subtitle{
-    margin-top:7px;
-    font-size:10px;
-    color:#606060;
-    letter-spacing:1.6px;
-}
-
-/* =========================
-   MAIN CARD
-========================= */
-
-.card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:23px;
-    padding:17px;
-
-    box-shadow:
-        0 25px 80px rgba(0,0,0,.5),
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.5),
         inset 0 1px 0 rgba(255,255,255,.025);
 
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
 
-    animation:cardIn .8s cubic-bezier(.2,.8,.2,1) both;
-}
-
-/* =========================
-   SECTION TITLE
-========================= */
-
-.section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    font-size:15px;
-    font-weight:750;
-
-    margin-bottom:11px;
-}
-
-.title-icon{
-    width:18px;
-    height:18px;
-    color:#d8d8d8;
-}
-
-.title-icon svg{
-    width:100%;
-    height:100%;
-}
-
-/* =========================
-   TEXTAREA
-========================= */
-
-.textarea-wrap{
-    position:relative;
-}
-
-textarea{
-    width:100%;
-    min-height:170px;
-
-    resize:none;
-
-    background:#0a0a0a;
-    border:1px solid rgba(255,255,255,.075);
-    border-radius:16px;
-
-    padding:16px;
-
-    color:#eee;
-
-    font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-
-    font-size:13px;
-    line-height:1.75;
-
-    outline:none;
-
-    transition:
-        border-color .25s ease,
-        box-shadow .25s ease,
-        background .25s ease;
-}
-
-textarea::placeholder{
-    color:#444;
-}
-
-textarea:focus{
-    border-color:rgba(255,255,255,.2);
-
-    background:#0c0c0c;
-
-    box-shadow:
-        0 0 0 4px rgba(255,255,255,.025);
-}
-
-/* =========================
-   STATS
-========================= */
-
-.stats{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    margin-top:10px;
-    padding:0 3px;
-}
-
-.stat{
-    color:#666;
-    font-size:10px;
-}
-
-.stat strong{
-    color:#aaa;
-    font-weight:700;
-}
-
-/* =========================
-   CREATE BUTTON
-========================= */
-
-.create-btn{
-    width:100%;
-    min-height:58px;
-
-    margin-top:15px;
-
-    border:0;
-    border-radius:16px;
-
-    background:#fff;
-    color:#050505;
-
-    font-size:14px;
-    font-weight:850;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:9px;
-
-    cursor:pointer;
-
-    box-shadow:
-        0 14px 35px rgba(255,255,255,.07);
-
-    transition:
-        transform .18s ease,
-        opacity .18s ease,
-        box-shadow .25s ease;
-}
-
-.create-btn:active{
-    transform:scale(.97);
-}
-
-.create-btn:hover{
-    box-shadow:
-        0 18px 45px rgba(255,255,255,.1);
-}
-
-.btn-icon{
-    width:18px;
-    height:18px;
-}
-
-.btn-icon svg{
-    width:100%;
-    height:100%;
-}
-
-/* =========================
-   RESULT HEADER
-========================= */
-
-.results{
-    margin-top:20px;
-
-    opacity:0;
-    transform:translateY(12px);
-    pointer-events:none;
-
-    transition:
-        opacity .4s ease,
-        transform .4s ease;
-}
-
-.results.show{
-    opacity:1;
-    transform:translateY(0);
-    pointer-events:auto;
-}
-
-.result-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    margin-bottom:11px;
-}
-
-.result-title{
-    font-size:14px;
-    font-weight:750;
-}
-
-.count{
-    min-width:30px;
-    height:25px;
-
-    padding:0 9px;
-
-    border-radius:99px;
-
-    background:#1b1b1b;
-    border:1px solid rgba(255,255,255,.06);
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    color:#aaa;
-    font-size:10px;
-    font-weight:700;
-}
-
-/* =========================
-   RESULT LIST
-========================= */
-
-.list{
-    display:flex;
-    flex-direction:column;
-    gap:9px;
-}
-
-.item{
-    background:#0a0a0a;
-    border:1px solid rgba(255,255,255,.06);
-
-    border-radius:15px;
-
-    padding:12px;
-
-    animation:itemIn .45s cubic-bezier(.2,.8,.2,1) both;
-
-    transition:
-        border-color .2s ease,
-        transform .2s ease;
-}
-
-.item:active{
-    transform:scale(.985);
-}
-
-.item-top{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.number{
-    width:27px;
-    height:27px;
-
-    flex-shrink:0;
-
-    border-radius:9px;
-
-    background:#151515;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    color:#777;
-
-    font-size:10px;
-    font-weight:750;
-}
-
-.key{
-    min-width:0;
-    flex:1;
-
-    color:#eee;
-
-    font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-
-    font-size:12px;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.copy{
-    flex-shrink:0;
-
-    border:1px solid rgba(255,255,255,.07);
-
-    background:#151515;
-    color:#aaa;
-
-    border-radius:9px;
-
-    padding:9px 11px;
-
-    font-size:9px;
-    font-weight:800;
-
-    cursor:pointer;
-
-    transition:
-        background .2s ease,
-        color .2s ease,
-        transform .15s ease;
-}
-
-.copy:active{
-    transform:scale(.92);
-}
-
-.copy.copied{
-    background:#fff;
-    color:#000;
-}
-
-/* URL */
-
-.url{
-    margin-top:9px;
-
-    padding:10px 11px;
-
-    border-radius:10px;
-
-    background:#080808;
-
-    border:1px solid rgba(255,255,255,.04);
-
-    color:#606060;
-
-    font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-
-    font-size:9px;
-
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-/* =========================
-   ACTIONS
-========================= */
-
-.actions{
-    display:flex;
-    gap:9px;
-
-    margin-top:12px;
-}
-
-.action-btn{
-    flex:1;
-
-    min-height:48px;
-
-    border-radius:13px;
-
-    background:#111;
-    color:#aaa;
-
-    border:1px solid rgba(255,255,255,.065);
-
-    font-size:10px;
-    font-weight:800;
-
-    cursor:pointer;
-
-    transition:
-        transform .18s ease,
-        background .2s ease,
-        color .2s ease;
-}
-
-.action-btn:active{
-    transform:scale(.96);
-}
-
-.action-btn.primary{
-    background:#fff;
-    color:#000;
-}
-
-/* =========================
-   TIMER
-========================= */
-
-.timer{
-    margin-top:15px;
-
-    padding:13px;
-
-    border-radius:13px;
-
-    background:rgba(255,255,255,.025);
-    border:1px solid rgba(255,255,255,.045);
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-}
-
-.timer-left{
-    display:flex;
-    align-items:center;
-    gap:9px;
-}
-
-.timer-icon{
-    width:16px;
-    height:16px;
-    color:#777;
-}
-
-.timer-icon svg{
-    width:100%;
-    height:100%;
-}
-
-.timer-text{
-    font-size:10px;
-    color:#666;
-}
-
-.timer-value{
-    color:#aaa;
-    font-family:monospace;
-    font-size:11px;
-    font-weight:700;
-}
-
-/* =========================
-   FOOTER
-========================= */
-
-.footer{
-    text-align:center;
-
-    color:#3d3d3d;
-
-    font-size:9px;
-
-    margin-top:22px;
-
-    letter-spacing:.8px;
-}
-
-/* =========================
-   TOAST
-========================= */
-
-.toast{
-    position:fixed;
-
-    left:50%;
-    bottom:25px;
-
-    transform:
-        translate(-50%,20px);
-
-    opacity:0;
-    pointer-events:none;
-
-    z-index:9999;
-
-    background:#fff;
-    color:#000;
-
-    padding:12px 17px;
-
-    border-radius:13px;
-
-    font-size:10px;
-    font-weight:800;
-
-    box-shadow:
-        0 15px 45px rgba(0,0,0,.45);
-
-    transition:
-        opacity .3s ease,
-        transform .3s cubic-bezier(.2,.8,.2,1);
-}
-
-.toast.show{
-    opacity:1;
-    transform:
-        translate(-50%,0);
-}
-
-/* =========================
-   ANIMATIONS
-========================= */
-
-@keyframes headerIn{
-    from{
-        opacity:0;
-        transform:translateY(-15px);
+      animation: fadeUp .8s ease;
     }
 
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
+    /* =========================
+       VIDEO
+    ========================= */
 
-@keyframes cardIn{
-    from{
-        opacity:0;
-        transform:
-            translateY(20px)
-            scale(.98);
-    }
+    .video-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
 
-    to{
-        opacity:1;
-        transform:
-            translateY(0)
-            scale(1);
-    }
-}
-
-@keyframes itemIn{
-    from{
-        opacity:0;
-        transform:
-            translateY(10px)
-            scale(.98);
+      font-size: 15px;
+      font-weight: 700;
+      margin: 5px 3px 12px;
     }
 
-    to{
-        opacity:1;
-        transform:
-            translateY(0)
-            scale(1);
-    }
-}
-
-/* =========================
-   MOBILE TUNING
-========================= */
-
-@media(max-width:380px){
-
-    .app{
-        padding-left:12px;
-        padding-right:12px;
+    .video-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
     }
 
-    .card{
-        padding:14px;
-        border-radius:20px;
+    .video-icon svg {
+      width: 100%;
+      height: 100%;
     }
 
-    .logo{
-        font-size:25px;
+    .video-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+
+      border-radius: 15px;
+      overflow: hidden;
+      background: #000;
+
+      box-shadow:
+        0 10px 35px rgba(0,0,0,.4);
     }
 
-    textarea{
-        min-height:150px;
+    .video-box iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
     }
 
-    .url{
-        font-size:8px;
+    /* =========================
+       KEY
+    ========================= */
+
+    .key-section {
+      margin-top: 17px;
     }
-}
-</style>
+
+    .label {
+      color: #6d6d6d;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin: 0 4px 8px;
+    }
+
+    .key-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+
+      min-height: 58px;
+      padding: 9px 10px 9px 15px;
+
+      background: #0b0b0b;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 15px;
+    }
+
+    .key-left {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .key-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: #aaa;
+    }
+
+    .key-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .key-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      font-family: monospace;
+      font-size: 14px;
+      color: #eee;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+
+      border: 0;
+      background: #fff;
+      color: #050505;
+
+      font-weight: 800;
+      font-size: 10px;
+
+      padding: 11px 13px;
+      border-radius: 10px;
+
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .copy-btn:active {
+      transform: scale(.94);
+    }
+
+    /* =========================
+       DOWNLOAD
+    ========================= */
+
+    .download {
+      margin-top: 16px;
+    }
+
+    .download-btn {
+      width: 100%;
+      min-height: 58px;
+
+      border: 0;
+      border-radius: 15px;
+
+      background: #fff;
+      color: #050505;
+
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .2px;
+
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+
+      box-shadow:
+        0 12px 30px rgba(255,255,255,.07);
+
+      transition:
+        transform .2s ease,
+        opacity .2s ease;
+    }
+
+    .download-btn:active {
+      transform: scale(.97);
+      opacity: .85;
+    }
+
+    .download-icon {
+      width: 19px;
+      height: 19px;
+      display: inline-flex;
+    }
+
+    .download-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .info {
+      text-align: center;
+      color: #5f5f5f;
+      font-size: 10px;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+
+    /* =========================
+       NOTICE
+    ========================= */
+
+    .notice {
+      margin-top: 14px;
+      padding: 13px 14px;
+
+      border-radius: 14px;
+
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.05);
+
+      color: #686868;
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: center;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .notice-icon {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .notice-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* =========================
+       ERROR
+    ========================= */
+
+    .error {
+      text-align: center;
+      padding: 45px 15px;
+    }
+
+    .error h2 {
+      font-size: 19px;
+      margin-bottom: 8px;
+    }
+
+    .error p {
+      color: #777;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .footer {
+      text-align: center;
+      color: #3f3f3f;
+      font-size: 9px;
+      margin-top: 22px;
+      letter-spacing: .7px;
+    }
+
+    /* =========================
+       DESKTOP WARNING
+    ========================= */
+
+    .desktop-warning {
+      display: none;
+      position: fixed;
+      inset: 0;
+
+      background: #050505;
+
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+      padding: 30px;
+
+      z-index: 10000;
+    }
+
+    .desktop-warning div {
+      max-width: 380px;
+    }
+
+    .desktop-warning h2 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .desktop-warning p {
+      color: #777;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    @media (min-width: 700px) {
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .desktop-warning {
+        display: flex;
+      }
+
+      .page {
+        display: none;
+      }
+    }
+
+    /* =========================
+       ANIMATION
+    ========================= */
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="app">
+  <!-- =========================
+       DESKTOP WARNING
+  ========================= -->
 
-    <!-- HEADER -->
+  <div class="desktop-warning">
+    <div>
+      <h2>Mobile Only</h2>
+
+      <p>
+        RIKI x Proxy ออกแบบมาสำหรับโทรศัพท์มือถือเท่านั้น
+        กรุณาเปิดเว็บไซต์ผ่านโทรศัพท์มือถือ
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =========================
+       MAIN PAGE
+  ========================= -->
+
+  <main class="page" id="mainPage">
+
+    <!-- Header -->
 
     <header class="header">
 
-        <div class="logo">
-            RIKI <span>Key Manager</span>
-        </div>
+      <div class="logo">
+        RIKI <span>x Proxy</span>
+      </div>
 
-        <div class="subtitle">
-            TEMPORARY LINK GENERATOR
-        </div>
+      <div class="subtitle">
+        PROXY DOWNLOAD CENTER
+      </div>
 
     </header>
 
 
-    <!-- MAIN CARD -->
+    <!-- Card -->
 
     <section class="card">
 
-        <div class="section-title">
 
-            <span class="title-icon">
+      <!-- VIDEO -->
 
-                <svg viewBox="0 0 24 24" fill="none">
+      <div class="video-title">
 
-                    <path
-                        d="M8 7H6.5A2.5 2.5 0 0 0 4 9.5v8A2.5 2.5 0 0 0 6.5 20h8a2.5 2.5 0 0 0 2.5-2.5V16"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"/>
+        <span class="video-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect
+              x="3"
+              y="5"
+              width="18"
+              height="14"
+              rx="3"
+              stroke="currentColor"
+              stroke-width="1.8"/>
+            <path
+              d="M10 9L16 12L10 15V9Z"
+              fill="currentColor"/>
+          </svg>
+        </span>
 
-                    <path
-                        d="M10 4h7.5A2.5 2.5 0 0 1 20 6.5V14a2.5 2.5 0 0 1-2.5 2.5H10A2.5 2.5 0 0 1 7.5 14V6.5A2.5 2.5 0 0 1 10 4Z"
-                        stroke="currentColor"
-                        stroke-width="1.8"/>
+        วิธีติดตั้ง Proxy
 
-                </svg>
+      </div>
+
+
+      <div class="video-box">
+
+        <iframe
+          src="https://www.youtube.com/embed/mSiJx33dkVo"
+          title="RIKI x Proxy Tutorial"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+
+      </div>
+
+
+      <!-- KEY -->
+
+      <div class="key-section">
+
+        <div class="label">
+          Your Key
+        </div>
+
+
+        <div class="key-box">
+
+          <div class="key-left">
+
+            <span class="key-icon">
+
+              <svg viewBox="0 0 24 24" fill="none">
+
+                <path
+                  d="M14.5 9.5
+                     A5 5 0 1 1 9.5 4.5
+                     A5 5 0 0 1 14.5 9.5Z"
+                  stroke="currentColor"
+                  stroke-width="1.8"/>
+
+                <path
+                  d="M13 13L20 20M17 17L19 15M15 15L17 13"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"/>
+
+              </svg>
 
             </span>
-
-            สร้างลิงก์ Key
-
-        </div>
-
-
-        <!-- INPUT -->
-
-        <div class="textarea-wrap">
-
-            <textarea
-                id="keyInput"
-                spellcheck="false"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                placeholder="ใส่ Key ทีละบรรทัด
-
-RIKI001
-RIKI002
-RIKI003
-RIKI004"></textarea>
-
-        </div>
-
-
-        <!-- STATS -->
-
-        <div class="stats">
-
-            <div class="stat">
-                จำนวน Key:
-                <strong id="inputCount">0</strong>
-            </div>
-
-            <div class="stat">
-                ระบบล้างอัตโนมัติ:
-                <strong>30 นาที</strong>
-            </div>
-
-        </div>
-
-
-        <!-- CREATE -->
-
-        <button
-            class="create-btn"
-            onclick="generateLinks()">
-
-            <span class="btn-icon">
-
-                <svg viewBox="0 0 24 24" fill="none">
-
-                    <path
-                        d="M12 3v18M3 12h18"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"/>
-
-                </svg>
-
-            </span>
-
-            สร้างลิงก์ทั้งหมด
-
-        </button>
-
-
-        <!-- RESULTS -->
-
-        <div
-            class="results"
-            id="results">
-
-            <div class="result-head">
-
-                <div class="result-title">
-                    ลิงก์ที่สร้างแล้ว
-                </div>
-
-                <div
-                    class="count"
-                    id="resultCount">
-                    0
-                </div>
-
-            </div>
 
 
             <div
-                class="list"
-                id="linkList">
+              class="key-value"
+              id="keyValue">
+              กำลังตรวจสอบ...
             </div>
 
-
-            <!-- ACTIONS -->
-
-            <div class="actions">
-
-                <button
-                    class="action-btn primary"
-                    onclick="copyAll()">
-
-                    คัดลอกทั้งหมด
-
-                </button>
-
-                <button
-                    class="action-btn"
-                    onclick="clearAll()">
-
-                    ล้างทั้งหมด
-
-                </button>
-
-            </div>
+          </div>
 
 
-            <!-- TIMER -->
+          <button
+            class="copy-btn"
+            id="copyBtn"
+            onclick="copyKey()">
 
-            <div class="timer">
+            COPY
 
-                <div class="timer-left">
-
-                    <span class="timer-icon">
-
-                        <svg viewBox="0 0 24 24" fill="none">
-
-                            <circle
-                                cx="12"
-                                cy="13"
-                                r="7.5"
-                                stroke="currentColor"
-                                stroke-width="1.7"/>
-
-                            <path
-                                d="M12 9v4l2.5 1.5"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"/>
-
-                            <path
-                                d="M9 3h6"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"/>
-
-                        </svg>
-
-                    </span>
-
-                    <span class="timer-text">
-                        ล้างข้อมูลอัตโนมัติใน
-                    </span>
-
-                </div>
-
-                <span
-                    class="timer-value"
-                    id="timer">
-                    30:00
-                </span>
-
-            </div>
+          </button>
 
         </div>
+
+      </div>
+
+
+      <!-- DOWNLOAD -->
+
+      <div class="download">
+
+        <button
+          class="download-btn"
+          id="downloadBtn"
+          onclick="downloadProxy()">
+
+          <span class="download-icon">
+
+            <svg viewBox="0 0 24 24" fill="none">
+
+              <path
+                d="M12 3V15"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+
+              <path
+                d="M7.5 11L12 15.5L16.5 11"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+
+              <path
+                d="M5 20H19"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+
+            </svg>
+
+          </span>
+
+          DOWNLOAD PROXY
+
+        </button>
+
+      </div>
+
+
+      <div
+        class="info"
+        id="downloadInfo">
+
+        กดปุ่มด้านบนเพื่อดาวน์โหลดไฟล์ Proxy
+
+      </div>
+
+
+      <!-- NOTICE -->
+
+      <div class="notice">
+
+        <span class="notice-icon">
+
+          <svg viewBox="0 0 24 24" fill="none">
+
+            <path
+              d="M12 3L21 20H3L12 3Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"/>
+
+            <path
+              d="M12 9V13"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"/>
+
+            <circle
+              cx="12"
+              cy="16.5"
+              r="1"
+              fill="currentColor"/>
+
+          </svg>
+
+        </span>
+
+        กรุณาดูวิดีโอสอนติดตั้งก่อนใช้งาน
+
+      </div>
 
     </section>
 
 
     <footer class="footer">
-        RIKI KEY MANAGER
+      RIKI x Proxy • Mobile Version
     </footer>
 
-</div>
+  </main>
 
 
-<!-- TOAST -->
+  <script>
 
-<div
-    class="toast"
-    id="toast">
-    คัดลอกแล้ว
-</div>
+    /* =====================================
+       DOWNLOAD URL
+    ===================================== */
 
-
-<script>
-
-/* =========================================
-   CONFIG
-========================================= */
-
-const DOWNLOAD_PAGE =
-    "https://marruriki0-spec.github.io/Download/";
-
-const RESET_TIME =
-    30 * 60 * 1000;
+    const DOWNLOAD_URL =
+      "https://delta.remoteios.online";
 
 
-/* =========================================
-   ELEMENTS
-========================================= */
+    /* =====================================
+       GET KEY FROM URL
 
-const input =
-    document.getElementById("keyInput");
+       ตัวอย่าง:
 
-const inputCount =
-    document.getElementById("inputCount");
+       https://riki.com/?key=sieh72736
+    ===================================== */
 
-const results =
-    document.getElementById("results");
+    const params =
+      new URLSearchParams(window.location.search);
 
-const linkList =
-    document.getElementById("linkList");
-
-const resultCount =
-    document.getElementById("resultCount");
-
-const timerElement =
-    document.getElementById("timer");
-
-const toast =
-    document.getElementById("toast");
+    const key =
+      params.get("key");
 
 
-/* =========================================
-   DATA
-========================================= */
+    const keyElement =
+      document.getElementById("keyValue");
 
-let generatedLinks = [];
+    const downloadButton =
+      document.getElementById("downloadBtn");
 
-let resetTimer = null;
-
-let countdownTimer = null;
-
-let resetAt = null;
+    const downloadInfo =
+      document.getElementById("downloadInfo");
 
 
-/* =========================================
-   COUNT INPUT
-========================================= */
+    /* =====================================
+       DISPLAY KEY
+    ===================================== */
 
-input.addEventListener("input", updateCount);
+    if (key && key.trim() !== "") {
 
-function getKeys(){
+      keyElement.textContent =
+        key.trim();
 
-    return input.value
-        .split(/\r?\n/)
-        .map(key => key.trim())
-        .filter(key => key !== "");
+    } else {
 
-}
+      keyElement.textContent =
+        "ไม่พบ Key";
 
+      downloadButton.disabled =
+        true;
 
-function updateCount(){
+      downloadButton.style.opacity =
+        "0.35";
 
-    const keys =
-        getKeys();
+      downloadButton.style.pointerEvents =
+        "none";
 
-    inputCount.textContent =
-        keys.length;
-
-}
-
-
-/* =========================================
-   GENERATE LINKS
-========================================= */
-
-function generateLinks(){
-
-    const keys =
-        getKeys();
-
-    if(keys.length === 0){
-
-        showToast("กรุณาใส่ Key ก่อน");
-
-        input.focus();
-
-        return;
+      downloadInfo.textContent =
+        "กรุณาเข้าผ่านลิงก์ที่มี Key";
     }
 
 
-    /*
-      ลบ Key ที่ซ้ำกัน
-    */
+    /* =====================================
+       COPY KEY
+    ===================================== */
 
-    const uniqueKeys =
-        [...new Set(keys)];
+    async function copyKey() {
 
+      if (!key) return;
 
-    generatedLinks =
-        uniqueKeys.map(key => {
+      try {
 
-            return {
-                key:key,
-                url:
-                    DOWNLOAD_PAGE +
-                    "?key=" +
-                    encodeURIComponent(key)
-            };
+        await navigator.clipboard.writeText(
+          key.trim()
+        );
 
-        });
+        const button =
+          document.getElementById("copyBtn");
 
-
-    renderLinks();
-
-    startResetTimer();
-
-}
-
-
-/* =========================================
-   RENDER
-========================================= */
-
-function renderLinks(){
-
-    linkList.innerHTML = "";
-
-    resultCount.textContent =
-        generatedLinks.length;
-
-
-    generatedLinks.forEach(
-        (item,index) => {
-
-            const row =
-                document.createElement("div");
-
-            row.className =
-                "item";
-
-            row.style.animationDelay =
-                `${Math.min(index * 45, 500)}ms`;
-
-
-            row.innerHTML = `
-
-                <div class="item-top">
-
-                    <div class="number">
-                        ${index + 1}
-                    </div>
-
-                    <div class="key">
-                        ${escapeHTML(item.key)}
-                    </div>
-
-                    <button
-                        class="copy"
-                        onclick="copyOne(${index}, this)">
-
-                        COPY
-
-                    </button>
-
-                </div>
-
-                <div class="url">
-                    ${escapeHTML(item.url)}
-                </div>
-
-            `;
-
-
-            linkList.appendChild(row);
-
-        }
-    );
-
-
-    results.classList.add("show");
-
-}
-
-
-/* =========================================
-   COPY ONE
-========================================= */
-
-async function copyOne(index,button){
-
-    const item =
-        generatedLinks[index];
-
-    if(!item) return;
-
-
-    const success =
-        await copyText(item.url);
-
-
-    if(success){
+        const oldText =
+          button.textContent;
 
         button.textContent =
-            "COPIED";
-
-        button.classList.add("copied");
-
-        showToast("คัดลอกลิงก์แล้ว");
-
+          "COPIED";
 
         setTimeout(() => {
 
-            button.textContent =
-                "COPY";
+          button.textContent =
+            oldText;
 
-            button.classList.remove(
-                "copied"
-            );
+        }, 1500);
 
-        },1200);
+      } catch (error) {
 
+        alert(
+          "ไม่สามารถคัดลอก Key ได้"
+        );
+
+      }
     }
 
-}
 
+    /* =====================================
+       DOWNLOAD
+    ===================================== */
 
-/* =========================================
-   COPY ALL
-========================================= */
+    function downloadProxy() {
 
-async function copyAll(){
+      if (!key) {
 
-    if(generatedLinks.length === 0){
-
-        showToast("ยังไม่มีลิงก์");
+        alert("ไม่พบ Key");
 
         return;
+      }
+
+      window.location.href =
+        DOWNLOAD_URL;
     }
 
-
-    const text =
-        generatedLinks
-            .map(item => item.url)
-            .join("\n");
-
-
-    const success =
-        await copyText(text);
-
-
-    if(success){
-
-        showToast(
-            `${generatedLinks.length} ลิงก์ถูกคัดลอกแล้ว`
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   COPY HELPER
-========================================= */
-
-async function copyText(text){
-
-    try{
-
-        await navigator.clipboard.writeText(text);
-
-        return true;
-
-    }catch(error){
-
-        /*
-          fallback สำหรับบาง browser
-        */
-
-        try{
-
-            const area =
-                document.createElement("textarea");
-
-            area.value =
-                text;
-
-            area.style.position =
-                "fixed";
-
-            area.style.opacity =
-                "0";
-
-            document.body.appendChild(area);
-
-            area.focus();
-
-            area.select();
-
-            document.execCommand("copy");
-
-            area.remove();
-
-            return true;
-
-        }catch(e){
-
-            return false;
-
-        }
-
-    }
-
-}
-
-
-/* =========================================
-   CLEAR
-========================================= */
-
-function clearAll(){
-
-    input.value = "";
-
-    generatedLinks = [];
-
-    linkList.innerHTML = "";
-
-    resultCount.textContent =
-        "0";
-
-    inputCount.textContent =
-        "0";
-
-    results.classList.remove(
-        "show"
-    );
-
-    stopResetTimer();
-
-    showToast(
-        "ล้างข้อมูลทั้งหมดแล้ว"
-    );
-
-}
-
-
-/* =========================================
-   AUTO RESET
-========================================= */
-
-function startResetTimer(){
-
-    stopResetTimer();
-
-
-    resetAt =
-        Date.now() +
-        RESET_TIME;
-
-
-    resetTimer =
-        setTimeout(() => {
-
-            clearAll();
-
-        }, RESET_TIME);
-
-
-    updateTimer();
-
-
-    countdownTimer =
-        setInterval(
-            updateTimer,
-            1000
-        );
-
-}
-
-
-function updateTimer(){
-
-    if(!resetAt){
-
-        timerElement.textContent =
-            "30:00";
-
-        return;
-    }
-
-
-    const remaining =
-        Math.max(
-            0,
-            resetAt - Date.now()
-        );
-
-
-    const seconds =
-        Math.ceil(
-            remaining / 1000
-        );
-
-
-    const minutes =
-        Math.floor(seconds / 60);
-
-    const secs =
-        seconds % 60;
-
-
-    timerElement.textContent =
-        String(minutes).padStart(2,"0") +
-        ":" +
-        String(secs).padStart(2,"0");
-
-
-    if(remaining <= 0){
-
-        stopResetTimer();
-
-    }
-
-}
-
-
-function stopResetTimer(){
-
-    if(resetTimer){
-
-        clearTimeout(
-            resetTimer
-        );
-
-        resetTimer = null;
-
-    }
-
-
-    if(countdownTimer){
-
-        clearInterval(
-            countdownTimer
-        );
-
-        countdownTimer = null;
-
-    }
-
-
-    resetAt = null;
-
-    timerElement.textContent =
-        "30:00";
-
-}
-
-
-/* =========================================
-   TOAST
-========================================= */
-
-let toastTimeout = null;
-
-function showToast(message){
-
-    toast.textContent =
-        message;
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimeout
-    );
-
-
-    toastTimeout =
-        setTimeout(() => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-        },1800);
-
-}
-
-
-/* =========================================
-   ESCAPE HTML
-========================================= */
-
-function escapeHTML(value){
-
-    return value
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-
-}
-
-
-/* =========================================
-   INITIAL
-========================================= */
-
-updateCount();
-
-</script>
+  </script>
 
 </body>
 </html>
