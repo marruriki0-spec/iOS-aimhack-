@@ -2,429 +2,168 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>RIKI x Proxy</title>
-  <meta name="theme-color" content="#070707">
 
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
+      font-family: Arial, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background:
-        radial-gradient(circle at 50% -10%, rgba(255,255,255,.09), transparent 36%),
-        #050505;
+      background: #050505;
       color: #fff;
       min-height: 100vh;
-      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
-      background-size: 35px 35px;
-      mask-image: linear-gradient(to bottom, black, transparent);
+    .desktop-warning {
+      display: none;
     }
 
-    .page {
+    .container {
       width: 100%;
-      max-width: 520px;
-      margin: auto;
-      padding: 20px 16px 35px;
-      position: relative;
-      z-index: 1;
+      max-width: 500px;
     }
 
-    /* =========================
-       HEADER
-    ========================= */
-
-    .header {
-      text-align: center;
-      padding: 18px 0 25px;
-      animation: fadeDown .7s ease;
+    .card {
+      background: #0d0d0d;
+      border: 1px solid #222;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 0 30px rgba(255,255,255,0.04);
     }
 
     .logo {
-      font-size: 27px;
+      text-align: center;
+      font-size: 28px;
       font-weight: 800;
-      letter-spacing: 1.5px;
-    }
-
-    .logo span {
-      color: #999;
-      font-weight: 500;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
     }
 
     .subtitle {
-      color: #666;
-      font-size: 11px;
-      margin-top: 7px;
-      letter-spacing: 1.2px;
-    }
-
-    /* =========================
-       MAIN CARD
-    ========================= */
-
-    .card {
-      background: rgba(17,17,17,.88);
-      border: 1px solid rgba(255,255,255,.075);
-      border-radius: 22px;
-      padding: 15px;
-
-      box-shadow:
-        0 20px 60px rgba(0,0,0,.5),
-        inset 0 1px 0 rgba(255,255,255,.025);
-
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-
-      animation: fadeUp .8s ease;
-    }
-
-    /* =========================
-       VIDEO
-    ========================= */
-
-    .video-title {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-
-      font-size: 15px;
-      font-weight: 700;
-      margin: 5px 3px 12px;
-    }
-
-    .video-icon {
-      width: 18px;
-      height: 18px;
-      display: inline-flex;
-    }
-
-    .video-icon svg {
-      width: 100%;
-      height: 100%;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 20px;
     }
 
     .video-box {
-      position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
-
-      border-radius: 15px;
+      aspect-ratio: 9 / 16;
+      border-radius: 14px;
       overflow: hidden;
       background: #000;
-
-      box-shadow:
-        0 10px 35px rgba(0,0,0,.4);
+      margin-bottom: 18px;
+      border: 1px solid #222;
     }
 
     .video-box iframe {
       width: 100%;
       height: 100%;
-      border: 0;
-      display: block;
+      border: none;
     }
 
-    /* =========================
-       KEY
-    ========================= */
-
-    .key-section {
-      margin-top: 17px;
-    }
-
-    .label {
-      color: #6d6d6d;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      margin: 0 4px 8px;
+    .key-title {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
     }
 
     .key-box {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-
-      min-height: 58px;
-      padding: 9px 10px 9px 15px;
-
-      background: #0b0b0b;
-      border: 1px solid rgba(255,255,255,.075);
-      border-radius: 15px;
+      gap: 8px;
+      background: #080808;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 12px;
     }
 
-    .key-left {
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .key-icon {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      color: #aaa;
-    }
-
-    .key-icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .key-value {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-
-      font-family: monospace;
+    #keyDisplay {
+      flex: 1;
+      padding: 11px;
       font-size: 14px;
-      color: #eee;
+      word-break: break-all;
+      color: #fff;
     }
 
     .copy-btn {
-      flex-shrink: 0;
-
-      border: 0;
+      border: none;
       background: #fff;
-      color: #050505;
-
-      font-weight: 800;
-      font-size: 10px;
-
-      padding: 11px 13px;
-      border-radius: 10px;
-
+      color: #000;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: .2s;
     }
 
-    .copy-btn:active {
-      transform: scale(.94);
-    }
-
-    /* =========================
-       DOWNLOAD
-    ========================= */
-
-    .download {
-      margin-top: 16px;
+    .notice {
+      text-align: center;
+      color: #777;
+      font-size: 12px;
+      margin: 12px 0 16px;
     }
 
     .download-btn {
       width: 100%;
-      min-height: 58px;
-
-      border: 0;
-      border-radius: 15px;
-
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
       background: #fff;
-      color: #050505;
-
-      font-size: 14px;
+      color: #000;
+      font-size: 15px;
       font-weight: 800;
-      letter-spacing: .2px;
-
       cursor: pointer;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-
-      box-shadow:
-        0 12px 30px rgba(255,255,255,.07);
-
-      transition:
-        transform .2s ease,
-        opacity .2s ease;
+      transition: 0.2s;
     }
 
-    .download-btn:active {
-      transform: scale(.97);
-      opacity: .85;
+    .download-btn + .download-btn {
+      margin-top: 10px;
     }
 
-    .download-icon {
-      width: 19px;
-      height: 19px;
-      display: inline-flex;
+    .download-btn:hover {
+      opacity: 0.9;
     }
 
-    .download-icon svg {
-      width: 100%;
-      height: 100%;
+    .download-btn:disabled {
+      background: #222;
+      color: #666;
+      cursor: not-allowed;
     }
-
-    .info {
-      text-align: center;
-      color: #5f5f5f;
-      font-size: 10px;
-      line-height: 1.6;
-      margin-top: 12px;
-    }
-
-    /* =========================
-       NOTICE
-    ========================= */
-
-    .notice {
-      margin-top: 14px;
-      padding: 13px 14px;
-
-      border-radius: 14px;
-
-      background: rgba(255,255,255,.025);
-      border: 1px solid rgba(255,255,255,.05);
-
-      color: #686868;
-      font-size: 10px;
-      line-height: 1.6;
-      text-align: center;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .notice-icon {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-    }
-
-    .notice-icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* =========================
-       ERROR
-    ========================= */
-
-    .error {
-      text-align: center;
-      padding: 45px 15px;
-    }
-
-    .error h2 {
-      font-size: 19px;
-      margin-bottom: 8px;
-    }
-
-    .error p {
-      color: #777;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    /* =========================
-       FOOTER
-    ========================= */
 
     .footer {
       text-align: center;
-      color: #3f3f3f;
-      font-size: 9px;
-      margin-top: 22px;
-      letter-spacing: .7px;
-    }
-
-    /* =========================
-       DESKTOP WARNING
-    ========================= */
-
-    .desktop-warning {
-      display: none;
-      position: fixed;
-      inset: 0;
-
-      background: #050505;
-
-      align-items: center;
-      justify-content: center;
-
-      text-align: center;
-      padding: 30px;
-
-      z-index: 10000;
-    }
-
-    .desktop-warning div {
-      max-width: 380px;
-    }
-
-    .desktop-warning h2 {
-      margin-bottom: 10px;
-      font-size: 20px;
-    }
-
-    .desktop-warning p {
-      color: #777;
-      font-size: 13px;
-      line-height: 1.7;
+      color: #555;
+      font-size: 11px;
+      margin-top: 18px;
     }
 
     @media (min-width: 700px) {
-
       body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: none;
       }
 
       .desktop-warning {
         display: flex;
-      }
-
-      .page {
-        display: none;
-      }
-    }
-
-    /* =========================
-       ANIMATION
-    ========================= */
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeDown {
-      from {
-        opacity: 0;
-        transform: translateY(-12px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
+        position: fixed;
+        inset: 0;
+        background: #050505;
+        color: #fff;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 30px;
+        font-size: 18px;
       }
     }
   </style>
@@ -432,359 +171,116 @@
 
 <body>
 
-  <!-- =========================
-       DESKTOP WARNING
-  ========================= -->
-
   <div class="desktop-warning">
-    <div>
-      <h2>Mobile Only</h2>
-
-      <p>
-        RIKI x Proxy ออกแบบมาสำหรับโทรศัพท์มือถือเท่านั้น
-        กรุณาเปิดเว็บไซต์ผ่านโทรศัพท์มือถือ
-      </p>
-    </div>
+    กรุณาเปิดหน้านี้บนโทรศัพท์มือถือ
   </div>
 
-
-  <!-- =========================
-       MAIN PAGE
-  ========================= -->
-
-  <main class="page" id="mainPage">
-
-    <!-- Header -->
-
-    <header class="header">
+  <div class="container">
+    <div class="card">
 
       <div class="logo">
-        RIKI <span>x Proxy</span>
+        RIKI x Proxy
       </div>
 
       <div class="subtitle">
-        PROXY DOWNLOAD CENTER
+        Mobile Version
       </div>
-
-    </header>
-
-
-    <!-- Card -->
-
-    <section class="card">
-
-
-      <!-- VIDEO -->
-
-      <div class="video-title">
-
-        <span class="video-icon">
-          <svg viewBox="0 0 24 24" fill="none">
-            <rect
-              x="3"
-              y="5"
-              width="18"
-              height="14"
-              rx="3"
-              stroke="currentColor"
-              stroke-width="1.8"/>
-            <path
-              d="M10 9L16 12L10 15V9Z"
-              fill="currentColor"/>
-          </svg>
-        </span>
-
-        วิธีติดตั้ง Proxy
-
-      </div>
-
 
       <div class="video-box">
-
         <iframe
-          src="https://www.youtube.com/embed/4OyVHDKcpnQ"
+          src="https://www.youtube.com/embed/urEEjSVt61Q"
           title="RIKI x Proxy Tutorial"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen>
         </iframe>
-
       </div>
 
-
-      <!-- KEY -->
-
-      <div class="key-section">
-
-        <div class="label">
-          Your Key
-        </div>
-
-
-        <div class="key-box">
-
-          <div class="key-left">
-
-            <span class="key-icon">
-
-              <svg viewBox="0 0 24 24" fill="none">
-
-                <path
-                  d="M14.5 9.5
-                     A5 5 0 1 1 9.5 4.5
-                     A5 5 0 0 1 14.5 9.5Z"
-                  stroke="currentColor"
-                  stroke-width="1.8"/>
-
-                <path
-                  d="M13 13L20 20M17 17L19 15M15 15L17 13"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"/>
-
-              </svg>
-
-            </span>
-
-
-            <div
-              class="key-value"
-              id="keyValue">
-              กำลังตรวจสอบ...
-            </div>
-
-          </div>
-
-
-          <button
-            class="copy-btn"
-            id="copyBtn"
-            onclick="copyKey()">
-
-            COPY
-
-          </button>
-
-        </div>
-
+      <div class="key-title">
+        KEY
       </div>
 
+      <div class="key-box">
+        <div id="keyDisplay">
+          กำลังตรวจสอบ Key...
+        </div>
 
-      <!-- DOWNLOAD -->
-
-      <div class="download">
-
-        <button
-          class="download-btn"
-          id="downloadBtn"
-          onclick="downloadProxy()">
-
-          <span class="download-icon">
-
-            <svg viewBox="0 0 24 24" fill="none">
-
-              <path
-                d="M12 3V15"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-
-              <path
-                d="M7.5 11L12 15.5L16.5 11"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"/>
-
-              <path
-                d="M5 20H19"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-
-            </svg>
-
-          </span>
-
-          DOWNLOAD PROXY
-
+        <button class="copy-btn" onclick="copyKey()">
+          COPY
         </button>
-
       </div>
-
-
-      <div
-        class="info"
-        id="downloadInfo">
-
-        กดปุ่มด้านบนเพื่อดาวน์โหลดไฟล์ Proxy
-
-      </div>
-
-
-      <!-- NOTICE -->
 
       <div class="notice">
-
-        <span class="notice-icon">
-
-          <svg viewBox="0 0 24 24" fill="none">
-
-            <path
-              d="M12 3L21 20H3L12 3Z"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linejoin="round"/>
-
-            <path
-              d="M12 9V13"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"/>
-
-            <circle
-              cx="12"
-              cy="16.5"
-              r="1"
-              fill="currentColor"/>
-
-          </svg>
-
-        </span>
-
         กรุณาดูวิดีโอสอนติดตั้งก่อนใช้งาน
-
       </div>
 
-    </section>
+      <button
+        id="downloadBtn"
+        class="download-btn"
+        onclick="downloadProxy()"
+        disabled>
+        DOWNLOAD
+      </button>
 
+      <button
+        id="happDownloadBtn"
+        class="download-btn"
+        onclick="downloadHapp()">
+        แอพ happ
+      </button>
 
-    <footer class="footer">
-      RIKI x Proxy • Mobile Version
-    </footer>
+      <div class="footer">
+        RIKI x Proxy • Mobile Version
+      </div>
 
-  </main>
-
+    </div>
+  </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get("key");
 
-    /* =====================================
-       DOWNLOAD URL
-    ===================================== */
+    const keyDisplay = document.getElementById("keyDisplay");
+    const downloadBtn = document.getElementById("downloadBtn");
 
-    const DOWNLOAD_URL =
-      "https://delta.remoteios.online";
+    const DOWNLOAD_URL = "https://client.aimhack.shop";
+    const HAPP_URL = "./happ.apk"; // วางไฟล์แอปที่เปลี่ยนชื่อเป็น happ.apk ไว้ในโฟลเดอร์เดียวกัน
 
-
-    /* =====================================
-       GET KEY FROM URL
-
-       ตัวอย่าง:
-
-       https://riki.com/?key=sieh72736
-    ===================================== */
-
-    const params =
-      new URLSearchParams(window.location.search);
-
-    const key =
-      params.get("key");
-
-
-    const keyElement =
-      document.getElementById("keyValue");
-
-    const downloadButton =
-      document.getElementById("downloadBtn");
-
-    const downloadInfo =
-      document.getElementById("downloadInfo");
-
-
-    /* =====================================
-       DISPLAY KEY
-    ===================================== */
-
-    if (key && key.trim() !== "") {
-
-      keyElement.textContent =
-        key.trim();
-
+    if (key) {
+      keyDisplay.textContent = key;
+      downloadBtn.disabled = false;
     } else {
-
-      keyElement.textContent =
-        "ไม่พบ Key";
-
-      downloadButton.disabled =
-        true;
-
-      downloadButton.style.opacity =
-        "0.35";
-
-      downloadButton.style.pointerEvents =
-        "none";
-
-      downloadInfo.textContent =
-        "กรุณาเข้าผ่านลิงก์ที่มี Key";
+      keyDisplay.textContent = "ไม่พบ Key";
+      downloadBtn.disabled = true;
     }
 
-
-    /* =====================================
-       COPY KEY
-    ===================================== */
-
-    async function copyKey() {
-
+    function copyKey() {
       if (!key) return;
 
-      try {
+      navigator.clipboard.writeText(key).then(() => {
+        const btn = document.querySelector(".copy-btn");
 
-        await navigator.clipboard.writeText(
-          key.trim()
-        );
-
-        const button =
-          document.getElementById("copyBtn");
-
-        const oldText =
-          button.textContent;
-
-        button.textContent =
-          "COPIED";
+        btn.textContent = "COPIED";
 
         setTimeout(() => {
-
-          button.textContent =
-            oldText;
-
+          btn.textContent = "COPY";
         }, 1500);
-
-      } catch (error) {
-
-        alert(
-          "ไม่สามารถคัดลอก Key ได้"
-        );
-
-      }
+      });
     }
-
-
-    /* =====================================
-       DOWNLOAD
-    ===================================== */
 
     function downloadProxy() {
+      if (!key) return;
 
-      if (!key) {
-
-        alert("ไม่พบ Key");
-
-        return;
-      }
-
-      window.location.href =
-        DOWNLOAD_URL;
+      window.location.href = DOWNLOAD_URL;
     }
 
+    function downloadHapp() {
+      const link = document.createElement("a");
+      link.href = HAPP_URL;
+      link.download = "happ.apk";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   </script>
 
 </body>
